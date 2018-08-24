@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Reptilian.Models;
+using Reptilian.Tool;
 
 namespace Reptilian.Controllers
 {
@@ -15,23 +17,21 @@ namespace Reptilian.Controllers
             return View();
         }
 
-        public IActionResult About()
+        public JsonResult GetKeys(string path)
         {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
-
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            string html = HttpHelper.GetHtml(path);
+            List<string> list = new List<string>();
+            if (!string.IsNullOrWhiteSpace(html))
+            {
+                Regex rg = new Regex("<span>.*</span>");
+                MatchCollection mc = rg.Matches(html);
+                foreach (var item in mc)
+                {
+                    Console.WriteLine(item.ToString());
+                    list.Add(item.ToString().Replace("<span>", "").Replace("</span>", ""));
+                }
+            }
+            return Json(html)
         }
     }
 }
