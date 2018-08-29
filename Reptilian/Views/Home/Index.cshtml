@@ -9,32 +9,60 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>Index</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 </head>
 <body>
-    请输入要爬取的URL:<input id="path" type="text"/>
-    <br />
-    <input type="button" value="开始分析" id="sub"/>
-    <span id="keys"></span>
+    <input type="button" value="开始分析" id="sub" />
+    <table class="table table-condensed" id="tb">
+        <tr>
+            <td class="success">车次</td>
+            <td class="success">出发时间</td>
+            <td class="success">到达时间</td>
+            <td class="success">历时</td>
+            <td class="success">软卧</td>
+            <td class="success">硬座</td>
+            <td class="success">硬卧</td>
+            <td class="success">无座</td>
+        </tr>
+    </table>
 </body>
 </html>
 <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <script>
     (function ($) {
         var Main = function () {
+            var _this = this;
             if (!(this instanceof Main)) {
                 return new Main();
             }
-            this.Init = function () { 
-                
+            this.Init = function () {
+                _this.Submit();
             }
             this.Submit = function () {
                 $(document).on("click", "#sub", function () {
-                    console.log("click");
-                    $.post("", { "path": $("#path").val() }, function (result) {
-                        $("#keys").html(result);
-                     },"JSON");
+                    $.post("/home/GetKeys", function (result) {
+                        var json = JSON.parse(result);
+                        for (var i = 0; i < json.data.result.length; i++) {
+                            var res = json.data.result[i].split('|');
+                            if (typeof res[28] != "undefined" && res[28] != "无" && res[28] != "") {
+                                var html = "<tr><td class='success'>" + res[3] + "</td>";
+                                html += "<td class='success'>" + res[8] + "</td>";
+                                html += "<td class='success'>" + res[9] + "</td>";
+                                html += "<td class='success'>" + res[10] + "</td>";
+                                html += "<td class='success'>" + res[23] + "</td>";
+                                html += "<td class='success'>" + res[26] + "</td>";
+                                html += "<td class='success'>" + res[28] + "</td>";
+                                html += "<td class='success'>" + res[29] + "</td></tr>";
+                                $("#tb").append(html);
+                            }
+                        }
+                    }, "JSON");
                 })
             }
         }
-     })(jQuery)
+        var main = Main();
+        main.Init();
+    })(jQuery)
 </script>
